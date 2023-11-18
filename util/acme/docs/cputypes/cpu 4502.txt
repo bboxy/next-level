@@ -1,0 +1,98 @@
+
+  4502 opcode table
+
+There are no more undocumented opcodes.
+All differences to the 65ce02 are marked using '!' signs (only
+opcodes 5c and ea anyway)
+
+
+00  brk             01  ora (zp, x)     02  cle             03  see
+04  tsb zp          05  ora zp          06  asl zp          07  rmb0 zp
+08  php             09  ora #imm8       0a  asl             0b  tsy
+0c  tsb abs16       0d  ora abs16       0e  asl abs16       0f  bbr0 zp, rel8
+10  bpl rel8        11  ora (zp), y     12  ora (zp), z     13  bpl rel16
+14  trb zp          15  ora zp, x       16  asl zp, x       17  rmb1 zp
+18  clc             19  ora abs16, y    1a  inc             1b  inz
+1c  trb abs16       1d  ora abs16, x    1e  asl abs16, x    1f  bbr1 zp, rel8
+
+20  jsr abs16       21  and (zp, x)     22  jsr (abs16)     23  jsr (abs16, x)
+24  bit zp          25  and zp          26  rol zp          27  rmb2 zp
+28  plp             29  and #imm8       2a  rol             2b  tys
+2c  bit abs16       2d  and abs16       2e  rol abs16       2f  bbr2 zp, rel8
+30  bmi rel8        31  and (zp), y     32  and (zp), z     33  bmi rel16
+34  bit zp, x       35  and zp, x       36  rol zp, x       37  rmb3 zp
+38  sec             39  and abs16, y    3a  dec             3b  dez
+3c  bit abs16, x    3d  and abs16, x    3e  rol abs16, x    3f  bbr3 zp, rel8
+
+40  rti             41  eor (zp, x)     42  neg             43  asr
+44  asr zp          45  eor zp          46  lsr zp          47  rmb4 zp
+48  pha             49  eor #imm8       4a  lsr             4b  taz
+4c  jmp abs16       4d  eor abs16       4e  lsr abs16       4f  bbr4 zp, rel8
+50  bvc rel8        51  eor (zp), y     52  eor (zp), z     53  bvc rel16
+54  asr zp, x       55  eor zp, x       56  lsr zp, x       57  rmb5 zp
+58  cli             59  eor abs16, y    5a  phy             5b  tab
+5c! map             5d  eor abs16, x    5e  lsr abs16, x    5f  bbr5 zp, rel8
+
+60  rts             61  adc (zp, x)     62  rtn #imm8       63  bsr rel16
+64  stz zp          65  adc zp          66  ror zp          67  rmb6 zp
+68  pla             69  adc #imm8       6a  ror             6b  tza
+6c  jmp (abs16)     6d  adc abs16       6e  ror abs16       6f  bbr6 zp, rel8
+70  bvs rel8        71  adc (zp), y     72  adc (zp), z     73  bvs rel16
+74  stz zp, x       75  adc zp, x       76  ror zp, x       77  rmb7 zp
+78  sei             79  adc abs16, y    7a  ply             7b  tba
+7c  jmp (abs16, x)  7d  adc abs16, x    7e  ror abs16, x    7f  bbr7 zp, rel8
+
+80  bra rel8        81  sta (zp, x)     82  sta (o8, s), y  83  bra rel16
+84  sty zp          85  sta zp          86  stx zp          87  smb0 zp
+88  dey             89  bit #imm8       8a  txa             8b  sty abs16, x
+8c  sty abs16       8d  sta abs16       8e  stx abs16       8f  bbs0 zp, rel8
+90  bcc rel8        91  sta (zp), y     92  sta (zp), z     93  bcc rel16
+94  sty zp, x       95  sta zp, x       96  stx zp, y       97  smb1 zp
+98  tya             99  sta abs16, y    9a  txs             9b  stx abs16, y
+9c  stz abs16       9d  sta abs16, x    9e  stz abs16, x    9f  bbs1 zp, rel8
+
+a0  ldy #imm8       a1  lda (zp, x)     a2  ldx #imm8       a3  ldz #imm8
+a4  ldy zp          a5  lda zp          a6  ldx zp          a7  smb2 zp
+a8  tay             a9  lda #imm8       aa  tax             ab  ldz abs16
+ac  ldy abs16       ad  lda abs16       ae  ldx abs16       af  bbs2 zp, rel8
+b0  bcs rel8        b1  lda (zp), y     b2  lda (zp), z     b3  bcs rel16
+b4  ldy zp, x       b5  lda zp, x       b6  ldx zp, y       b7  smb3 zp
+b8  clv             b9  lda abs16, y    ba  tsx             bb  ldz abs16, x
+bc  ldy abs16, x    bd  lda abs16, x    be  ldx abs16, y    bf  bbs3 zp, rel8
+
+c0  cpy #imm8       c1  cmp (zp, x)     c2  cpz #imm8       c3  dew zp
+c4  cpy zp          c5  cmp zp          c6  dec zp          c7  smb4 zp
+c8  iny             c9  cmp #imm8       ca  dex             cb  asw abs16
+cc  cpy abs16       cd  cmp abs16       ce  dec abs16       cf  bbs4 zp, rel8
+d0  bne rel8        d1  cmp (zp), y     d2  cmp (zp), z     d3  bne rel16
+d4  cpz zp          d5  cmp zp, x       d6  dec zp, x       d7  smb5 zp
+d8  cld             d9  cmp abs16, y    da  phx             db  phz
+dc  cpz abs16       dd  cmp abs16, x    de  dec abs16, x    df  bbs5 zp, rel8
+
+e0  cpx #imm8       e1  sbc (zp, x)     e2  lda (o8, s), y  e3  inw zp
+e4  cpx zp          e5  sbc zp          e6  inc zp          e7  smb6 zp
+e8  inx             e9  sbc #imm8       ea! nop/eom         eb  row abs16
+ec  cpx abs16       ed  sbc abs16       ee  inc abs16       ef  bbs6 zp, rel8
+f0  beq rel8        f1  sbc (zp), y     f2  sbc (zp), z     f3  beq rel16
+f4  phw #imm16      f5  sbc zp, x       f6  inc zp, x       f7  smb7 zp
+f8  sed             f9  sbc abs16, y    fa  plx             fb  plz
+fc  phw abs16       fd  sbc abs16, x    fe  inc abs16, x    ff  bbs7 zp, rel8
+
+
+#imm8:  8-bit immediate value
+#imm16: 16-bit immediate value (only for opcode f4)
+zp:     8-bit zeropage address
+abs16:  16-bit absolute address
+rel8:   8-bit relative address offset
+rel16:  16-bit relative address offset
+o8:     8-bit offset (for stack-relative addressing, see opcodes 82 and e2)
+
+
+The 4502 is a superset of the 65ce02. Opcode 5c (originally a "4-byte NOP
+reserved for future expansion") has been changed to the "map" instruction,
+now using implied addressing.
+"map" uses the contents of the A/X/Y/Z registers to alter the memory map.
+Because this might also change the current stack memory, all interrupts are
+then implicitly disabled until an "eom" instruction gets executed.
+"eom" stands for "end of mapping", but this is actually just a new alias for
+opcode ea, the 6502-standard NOP.

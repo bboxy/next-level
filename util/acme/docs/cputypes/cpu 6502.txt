@@ -1,0 +1,84 @@
+
+  6502 opcode table
+
+All empty entries are undocumented opcodes.
+Notice there are no documented opcodes in the fourth column.
+
+
+00  brk             01  ora (zp, x)     02                  03
+04                  05  ora zp          06  asl zp          07
+08  php             09  ora #imm8       0a  asl             0b
+0c                  0d  ora abs16       0e  asl abs16       0f
+10  bpl rel8        11  ora (zp), y     12                  13
+14                  15  ora zp, x       16  asl zp, x       17
+18  clc             19  ora abs16, y    1a                  1b
+1c                  1d  ora abs16, x    1e  asl abs16, x    1f
+
+20  jsr abs16       21  and (zp, x)     22                  23
+24  bit zp          25  and zp          26  rol zp          27
+28  plp             29  and #imm8       2a  rol             2b
+2c  bit abs16       2d  and abs16       2e  rol abs16       2f
+30  bmi rel8        31  and (zp), y     32                  33
+34                  35  and zp, x       36  rol zp, x       37
+38  sec             39  and abs16, y    3a                  3b
+3c                  3d  and abs16, x    3e  rol abs16, x    3f
+
+40  rti             41  eor (zp, x)     42                  43
+44                  45  eor zp          46  lsr zp          47
+48  pha             49  eor #imm8       4a  lsr             4b
+4c  jmp abs16       4d  eor abs16       4e  lsr abs16       4f
+50  bvc rel8        51  eor (zp), y     52                  53
+54                  55  eor zp, x       56  lsr zp, x       57
+58  cli             59  eor abs16, y    5a                  5b
+5c                  5d  eor abs16, x    5e  lsr abs16, x    5f
+
+60  rts             61  adc (zp, x)     62                  63
+64                  65  adc zp          66  ror zp          67
+68  pla             69  adc #imm8       6a  ror             6b
+6c  jmp (abs16)     6d  adc abs16       6e  ror abs16       6f
+70  bvs rel8        71  adc (zp), y     72                  73
+74                  75  adc zp, x       76  ror zp, x       77
+78  sei             79  adc abs16, y    7a                  7b
+7c                  7d  adc abs16, x    7e  ror abs16, x    7f
+
+80                  81  sta (zp, x)     82                  83
+84  sty zp          85  sta zp          86  stx zp          87
+88  dey             89                  8a  txa             8b
+8c  sty abs16       8d  sta abs16       8e  stx abs16       8f
+90  bcc rel8        91  sta (zp), y     92                  93
+94  sty zp, x       95  sta zp, x       96  stx zp, y       97
+98  tya             99  sta abs16, y    9a  txs             9b
+9c                  9d  sta abs16, x    9e                  9f
+
+a0  ldy #imm8       a1  lda (zp, x)     a2  ldx #imm8       a3
+a4  ldy zp          a5  lda zp          a6  ldx zp          a7
+a8  tay             a9  lda #imm8       aa  tax             ab
+ac  ldy abs16       ad  lda abs16       ae  ldx abs16       af
+b0  bcs rel8        b1  lda (zp), y     b2                  b3
+b4  ldy zp, x       b5  lda zp, x       b6  ldx zp, y       b7
+b8  clv             b9  lda abs16, y    ba  tsx             bb
+bc  ldy abs16, x    bd  lda abs16, x    be  ldx abs16, y    bf
+
+c0  cpy #imm8       c1  cmp (zp, x)     c2                  c3
+c4  cpy zp          c5  cmp zp          c6  dec zp          c7
+c8  iny             c9  cmp #imm8       ca  dex             cb
+cc  cpy abs16       cd  cmp abs16       ce  dec abs16       cf
+d0  bne rel8        d1  cmp (zp), y     d2                  d3
+d4                  d5  cmp zp, x       d6  dec zp, x       d7
+d8  cld             d9  cmp abs16, y    da                  db
+dc                  dd  cmp abs16, x    de  dec abs16, x    df
+
+e0  cpx #imm8       e1  sbc (zp, x)     e2                  e3
+e4  cpx zp          e5  sbc zp          e6  inc zp          e7
+e8  inx             e9  sbc #imm8       ea  nop             eb
+ec  cpx abs16       ed  sbc abs16       ee  inc abs16       ef
+f0  beq rel8        f1  sbc (zp), y     f2                  f3
+f4                  f5  sbc zp, x       f6  inc zp, x       f7
+f8  sed             f9  sbc abs16, y    fa                  fb
+fc                  fd  sbc abs16, x    fe  inc abs16, x    ff
+
+
+#imm8:  8-bit immediate value
+zp:     8-bit zeropage address
+abs16:  16-bit absolute address
+rel8:   8-bit relative address offset

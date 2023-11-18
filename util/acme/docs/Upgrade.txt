@@ -1,0 +1,200 @@
+
+
+                                 ACME
+
+         ...the ACME Crossassembler for Multiple Environments
+
+                --- upgrading from earlier versions ---
+
+
+If you haven't used ACME before, you don't need to read this text.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.97
+----------------------------------------------------------------------
+
+a) Single quotes vs. double quotes:
+Since "anything in double quotes" is now considered to be a string,
+problems can arise when trying to do a calculation with a character
+code. Here are some examples:
+	lda #' '	; loads 32 like before (ASCII code of space)
+	lda #' ' + 1	; loads 33 like before (32 plus one)
+	lda #" "	; loads 32 like before (ASCII code of space)
+	lda #" " + 1	; used to load 33, now fails with error!
+The third example still works, because 1-char-strings are treated
+just like single characters when returned by the expression parser as
+an argument for a mnemonic.
+However, the fourth example now fails because the expression parser
+tries to add a string to an integer, which is an undefined operation.
+Some examples for a related problem:
+	a = ' '		; a is 32 (ASCII code of space)
+	b = ' ' + 1	; b is 33 (32 plus one)
+	c = "!"		; c used to be 33, now it's a 1-char string
+	d = "!" + "!"	; d used to be 66, now it's a 2-char string
+If you do not get any errors when compiling your old sources, you do
+not need to worry about this problem.
+If you _do_ get errors, just use single quotes instead of double
+quotes. If you had to use double quotes because the quoted character
+itself is a single quote, write '\'' instead (backslash escaping, see
+below).
+
+b) Backslash escaping:
+Backslashes in single or double quotes are now used as escape
+characters. You need to replace any backslash in older sources with a
+sequence of two backslashes, so "some\string" becomes "some\\string",
+and a single character '\' becomes '\\'.
+If you have used backslashes as directory separators in path names (in
+Windows/DOS environments), these also need changing - but instead of
+using a double backslash, just use a single forward slash ('/')
+instead. This has the added benefit of making the sources platform-
+independent (*and* it's compatible to older ACME releases as well).
+
+c) Character values are now unsigned:
+When parsing a character in single quotes, ACME returns its character
+code, according to the chosen encoding (raw/petscii/screencode). If
+this resulted in a byte with its most significant bit set, the actual
+number was architecture-dependent. Here's an example:
+		!ct pet	; choose PetSCII encoding
+		x = 'A'	; PetSCII 'A' is 0xc1, so MSB is set
+Now x was either -63 or +193, depending on the host cpu architecture.
+Since release 0.97, this example will give 193 on all architectures.
+In most cases, this is not a problem, because the actual bit pattern
+of the lower eight bits is the same. But if you have written any code
+where the numerical value of a PetSCII character is used for 
+computations _in_the_source_code_, please check those computations.
+
+Use the "--dialect 0.94.12" CLI switch to get the old behavior
+concerning a) double quotes and b) backslashes. There is no way to get
+the old behavior concerning c) character values, because, as explained
+above, the old behavior was architecture-dependent, which is a bad
+idea(tm).
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.95.2
+----------------------------------------------------------------------
+
+In 6510 mode, ACME now outputs 0x0b instead of 0x2b when assembling
+the undocumented ("illegal") ANC #imm8 instruction. Both opcodes do
+the same thing, this was only changed because all other mnemonics use
+the lowest-numbered possible opcode as well.
+Forcing the old behavior via the "--dialect" switch is not supported.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.94.12
+----------------------------------------------------------------------
+
+The pseudo opcode "!for" has a new syntax. The old syntax still works,
+but gives a warning.
+You can use the "--dialect 0.94.8" CLI switch to get the old behavior.
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.94.8
+----------------------------------------------------------------------
+
+The pseudo opcodes "!cbm", "!subzone" and "!realpc" no longer give
+warnings, but have now been disabled.
+You can use the "--dialect 0.94.6" CLI switch to get the old behavior.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.94.6
+----------------------------------------------------------------------
+
+The "to-the-power-of" operator ('^') is now right-associative, so
+    b^c^d    will now give    b^(c^d)    instead of    (b^c)^d
+If you have never used the operator in this way, you don't need to
+worry about it.
+You can use the "--dialect 0.86" CLI switch to get the old behavior.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.89
+----------------------------------------------------------------------
+
+The "logical shift right" operator has been changed. Note: This is
+about ACME's expression parser and has nothing to do with the 6502
+mnemonic called "LSR".
+Older versions were supposed to work like this:
+	a = b >> c	; alias "LSR", do a logical shift right
+But what they actually did depended on the compiler that was used to
+create the ACME binary: many binaries did an "arithmetic shift right"
+instead. This has now been fixed and changed to:
+	a = b >> c	; alias "ASR", do an arithmetic shift right
+	a = b >>> c	; alias "LSR", do a logical shift right
+If you have never applied the old ">>"/"LSR" operator to a negative
+value, you do not need to worry about this. If you have, please check
+what you expected to happen in those instances (arithmetic or logical
+shift) and update your source codes accordingly (use either ">>"/"ASR"
+or ">>>"/"LSR").
+Forcing the old behavior via the "--dialect" switch is not possible,
+because as explained above, the old behavior was compiler-dependent
+anyway.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.07
+----------------------------------------------------------------------
+
+Re-defining the program counter via "* = NEW_VALUE" no longer starts
+offset assembly. Instead, ACME will change its pointer into the output
+buffer to the given value, so you can write your code in distinct
+segments. These segments can be given in any order. After assembly,
+ACME stores everything from the lowest address used to the highest
+address used. Have a look at "AllPOs.txt" for an example on how to use
+this facility.
+
+Offset assembly is now done using a new pseudo opcode called
+"!pseudopc". Have a look at "AllPOs.txt" for further information on
+its syntax and usage.
+
+The pseudo opcode "!end" has been removed. Use "!eof" instead.
+
+The mnemonic BIT can no longer be assembled without any argument. If
+you want to insert the opcode only to mask the next instruction, use
+	!src <6502/std.a>
+to get the definitions for these two macros:
+	+bit8	; output $24 to mask following 1-byte instruction
+	+bit16	; output $2c to mask following 2-byte instruction
+
+When using the 65816 cpu, ACME now uses the correct argument order for
+the MVN and MVP mnemonics, which is:
+	mnemonic source_bank, destination_bank
+
+Using leading zeroes in hexadecimal or binary values makes ACME use
+bigger addressing modes than needed. This has now been extended to
+symbols as well:
+	label2 = $00fa
+		lda label2
+will be assembled to:
+    ad fa 00    lda $00fa
+
+Forcing the old behavior via the "--dialect" switch is not supported.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.04 beta
+----------------------------------------------------------------------
+
+The pseudo opcode "!module" has been removed. Use "!zone" instead.
+Forcing the old behavior via the "--dialect" switch is not supported.
+
+
+
+----------------------------------------------------------------------
+Upgrading from earlier releases to ACME release 0.03 beta
+----------------------------------------------------------------------
+
+It is no longer possible to have more than one label in a single line.
+Forcing the old behavior via the "--dialect" switch is not supported.
+

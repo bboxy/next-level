@@ -1,0 +1,120 @@
+
+  m65 opcode table(s)
+
+The m65 instruction set extends the 4502 instruction set using prefix bytes.
+Therefore, the "normal" opcode table is the same as for the 4502 cpu (see that
+file), so this file only contains information about the extensions.
+
+
+"quad mode" allows 32-bit data operations using a virtual register called 'Q'.
+The mnemonics aslq/lsrq/rolq/rorq/inq/deq have five addressing modes.
+The mnemonic ldq has eight addressing modes in quad mode, and a ninth when
+combined with long mode.
+The mnemonics stq/cpq/adcq/sbcq/andq/eorq/orq have three addressing modes in
+quad mode, and a fourth when combined with long mode.
+The mnemonic bitq has two addressing modes.
+The mnemonic asrq has three addressing modes.
+This mode is entered after a NEG:NEG (42 42) prefix, the following opcode is
+then taken from this table:
+
+00                  01                  02                  03
+04                  05 orq zp           06 aslq zp          07
+08                  09                  0a aslq             0b
+0c                  0d orq abs16        0e aslq abs16       0f
+10                  11                  12 orq (zp)         13
+14                  15                  16 aslq zp, x       17
+18                  19                  1a inq              1b
+1c                  1d                  1e aslq abs16, x    1f
+
+20                  21                  22                  23
+24 bitq zp          25 andq zp          26 rolq zp          27
+28                  29                  2a rolq             2b
+2c bitq abs16       2d andq abs16       2e rolq abs16       2f
+30                  31                  32 andq (zp)        33
+34                  35                  36 rolq zp, x       37
+38                  39                  3a deq              3b
+3c                  3d                  3e rolq abs16, x    3f
+
+40                  41                  42                  43 asrq
+44 asrq zp          45 eorq zp          46 lsrq zp          47
+48                  49                  4a lsrq             4b
+4c                  4d eorq abs16       4e lsrq abs16       4f
+50                  51                  52 eorq (zp)        53
+54 asrq zp, x       55                  56 lsrq zp, x       57
+58                  59                  5a                  5b
+5c                  5d                  5e lsrq abs16, x    5f
+
+60                  61                  62                  63
+64                  65 adcq zp          66 rorq zp          67
+68                  69                  6a rorq             6b
+6c                  6d adcq abs16       6e rorq abs16       6f
+70                  71                  72 adcq (zp)        73
+74                  75                  76 rorq zp, x       77
+78                  79                  7a                  7b
+7c                  7d                  7e rorq abs16, x    7f
+
+80                  81                  82                  83
+84                  85 stq zp           86                  87
+88                  89                  8a                  8b
+8c                  8d stq abs16        8e                  8f
+90                  91                  92 stq (zp)         93
+94                  95                  96                  97
+98                  99                  9a                  9b
+9c                  9d                  9e                  9f
+
+a0                  a1                  a2                  a3
+a4                  a5 ldq zp           a6                  a7
+a8                  a9                  aa                  ab
+ac                  ad ldq abs16        ae                  af
+b0                  b1 ldq (zp), y      b2 ldq (zp)         b3
+b4                  b5 ldq zp, x        b6                  b7
+b8                  b9 ldq abs16, y     ba                  bb
+bc                  bd ldq abs16, x     be                  bf
+
+c0                  c1                  c2                  c3
+c4                  c5 cpq zp           c6 deq zp           c7
+c8                  c9                  ca                  cb
+cc                  cd cpq abs16        ce deq abs16        cf
+d0                  d1                  d2 cpq (zp)         d3
+d4                  d5                  d6 deq zp, x        d7
+d8                  d9                  da                  db
+dc                  dd                  de deq abs16, x     df
+
+e0                  e1                  e2 ldq (zp, s), y   e3
+e4                  e5 sbcq zp          e6 inq zp           e7
+e8                  e9                  ea                  eb
+ec                  ed sbcq abs16       ee inq abs16        ef
+f0                  f1                  f2 sbcq (zp)        f3
+f4                  f5                  f6 inq zp, x        f7
+f8                  f9                  fa                  fb
+fc                  fd                  fe inq abs16, x     ff
+
+zp:     8-bit zeropage address
+abs16:  16-bit absolute address
+
+
+"long mode" adds an addressing mode using 32-bit pointers for eight existing
+mnemonics. This mode is entered after a NOP (ea) prefix, the following opcode
+should then be one of these:
+
+12 ora [zp], z      32 and [zp], z      52 eor [zp], z      72 adc [zp], z
+92 sta [zp], z      b2 lda [zp], z      d2 cmp [zp], z      f2 sbc [zp], z
+
+
+"quad" and "long" modes can be combined to have 32-bit data access using a
+32-bit pointer. This adds another addressing mode for eight of the new
+mnemonics. This mode is entered after a NEG:NEG:NOP (42 42 ea) prefix, the
+following opcode should then be one of these:
+
+12 orq [zp]         32 andq [zp]        52 eorq [zp]        72 adcq [zp]
+92 stq [zp]         b2 ldq [zp]         d2 cpq [zp]         f2 sbcq [zp]
+
+
+Because the addressing modes are changed a bit by the prefix codes, here are
+some of the unsupported combinations just for comparison (these result in
+"Illegal combination of command and addressing mode"):
+	lda (zp)	; 65c02 knew this, but 65ce02 added z index!
+	lda [zp]	; long mode also expects z index!
+	ldq #imm	; quad mode has no immediate addressing!
+	ldq (zp), z	; quad mode does not use z index!
+	ldq [zp], z	; quad and long modes combined do not use z index!

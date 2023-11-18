@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html><head></head>
+<style>
+#myCanvas {
+  width: 960px;
+  height: 600px;
+  image-rendering: pixelated;
+}
+</style>
+<body>
+<canvas id="myCanvas" width="320" height="200" style="border:0px solid #000000;"></canvas><br>
+Colouring sprite:
+<canvas id="mySprite" width="24" height="21" style="border:1px solid #000000;"></canvas>
+<script>
+var canvas = document.getElementById("myCanvas");
+var canvasWidth = canvas.width;
+var canvasHeight = canvas.height;
+var ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+function updateCanvas(angle, text, x, y) {
+  //var img = document.getElementById("scream");
+  //ctx.drawImage(img, 0, 0);
+  ctx.font = "12px Arial";
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+  // Make sure that the text is drawn:
+  ctx.drawImage(ctx.canvas, 0,0);
+  var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  // threshold colors:
+  var i;
+  var threshold = 50;
+  for (i = 0; i < imgData.data.length; i += 4) {
+    imgData.data[i] = imgData.data[i] > threshold ? 255 : 0;
+    imgData.data[i+1] = imgData.data[i] > threshold ? 255 : 0;
+    imgData.data[i+2] = imgData.data[i] > threshold ? 255 : 0;
+    imgData.data[i+3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+
+const output_data = new Uint8Array(16384);
+
+function duplicateCanvas(time, angle, x, y) {
+  ctx.drawImage(ctx.canvas, 0,0);
+  var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var duplicate_width = 64;
+  for (var i = 0; i < imgData.data.length; i += 4) {
+      for (dupx = 1; dupx < 5; dupx++) {
+        if (dupx != 0) {
+          imgData.data[i] += imgData.data[i + 4*duplicate_width*dupx];
+          imgData.data[i+1] += imgData.data[i+1 + 4*duplicate_width*dupx];
+          imgData.data[i+2] += imgData.data[i+2 + 4*duplicate_width*dupx];
+        }
+      }
+  }
+  ctx.putImageData(imgData, 0, 0);
+  ctx.drawImage(ctx.canvas, 0,0);
+  var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var duplicate_height = 16;
+  var duplicate_x_offset = 24;
+  //var duplicate_x_offset = 16;
+  for (var i = 0; i < imgData.data.length; i += 4) {
+      for (dupy = -5; dupy < 3; dupy++) {
+        if (dupy != 0) {
+          imgData.data[i] += imgData.data[i + 4*duplicate_height*canvas.width*dupy + 4*duplicate_x_offset*dupy];
+          imgData.data[i+1] += imgData.data[i+1 + 4*duplicate_height*canvas.width*dupy + 4*duplicate_x_offset*dupy];
+          imgData.data[i+2] += imgData.data[i+2 + 4*duplicate_height*canvas.width*dupy + 4*duplicate_x_offset*dupy];
+        }
+      }
+  }
+  ctx.putImageData(imgData, 0, 0);
+  //return canvas.toDataURL();
+
+  output_width = 64;
+  output_height = 16;
+  // When using duplicate_x_offset=16 above:
+  //output_x_offset = 128 + 24;  //+8  -8
+  // When using duplicate_x_offset=24 above:
+  output_x_offset = 40 + 128 + 24;  //+8  -8
+  output_y_offset = 128 + 3; //+4
+  // each frame is 2*8 chars = 128 bytes.
+  ctx.drawImage(ctx.canvas, 0,0);
+  var outputData = ctx.getImageData(output_x_offset, output_y_offset, output_width, output_height);
+  var byte_no = 0;
+  for (let col_no = 0; col_no <= 7; col_no++) {
+    for (let row_no = 0; row_no <= 1; row_no++) {
+      for (let char_y_offset = 0; char_y_offset <= 7; char_y_offset++) {
+        let this_byte = 0;
+        for (let char_x_offset = 7; char_x_offset >= 0; char_x_offset--) {
+          let pixel_x = col_no * 8 + char_x_offset;
+          let pixel_y = row_no * 8 + char_y_offset;
+          let pixel_number = pixel_x + output_width * pixel_y;
+          let this_pixel = 1 - Math.round(outputData.data[4 * pixel_number] / 255);
+          this_byte = this_byte*2 + this_pixel;
+        }
+        output_data[time*output_width/8*output_height + byte_no] = this_byte;
+        byte_no++;
+      }
+    }
+  }
+  ctx.putImageData(outputData, 0, 0);
+
+
+
+  // Colorize with two sprites.
+  // Each sprite is 48*42 pixels.
+
+  // First, let's make the sprites:
+  let sprite_angle = Math.round((angle / 2 / Math.PI) * 64) / 64 * 2 * Math.PI;
+  var sprite = document.getElementById("mySprite");
+  var sprite_ctx = sprite.getContext("2d", { willReadFrequently: true });
+  sprite_ctx.fillStyle = '#000';
+  sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
+  sprite_ctx.fillStyle = '#000';
+  sprite_ctx.fillRect(0, 0, canvas.width, canvas.height);
+  sprite_ctx.fillStyle = '#fff';
+
+  sprite_ctx.save();
+  //Move to the center of the canvas to (50,10) point.   
+  sprite_ctx.translate(12, 10);
+  // Rotate the canvas by 30 degrees.
+  sprite_ctx.rotate(sprite_angle);
+  sprite_ctx.fillStyle = '#fff';
+  sprite_ctx.fillRect(-12, -4, 24, 7);
+  // Restore the unrotated context   
+  sprite_ctx.restore();
+  // And now, grab the sprite data:
+  var mask = sprite_ctx.getImageData(0, 0, sprite.width, sprite.height);
+  //console.log(mask.data);
+
+
+  ctx.drawImage(ctx.canvas, 0,0);
+  var canvasData_2 = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+  let sprites_x = x;
+  let sprites_y = y - 4;
+  let spr_x = Math.round(sprites_x + 16 * Math.cos(sprite_angle));
+  let spr_y = Math.round(sprites_y + 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+//        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 128;
+      }
+    }
+  }
+  spr_x = Math.round(sprites_x - 16 * Math.cos(sprite_angle));
+  spr_y = Math.round(sprites_y - 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+//        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 128;
+      }
+    }
+  }
+
+  sprites_x = x + 24 + 64;
+  sprites_y = y - 4 + 16;
+  spr_x = Math.round(sprites_x + 16 * Math.cos(sprite_angle));
+  spr_y = Math.round(sprites_y + 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+//        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+//        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+      }
+    }
+  }
+  spr_x = Math.round(sprites_x - 16 * Math.cos(sprite_angle));
+  spr_y = Math.round(sprites_y - 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+//        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+//        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+      }
+    }
+  }
+
+  sprites_x = x - 24 + 64 + 64 + 64;
+  sprites_y = y - 4 - 16;
+  spr_x = Math.round(sprites_x + 16 * Math.cos(sprite_angle));
+  spr_y = Math.round(sprites_y + 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+//        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 128;
+//        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+      }
+    }
+  }
+  spr_x = Math.round(sprites_x - 16 * Math.cos(sprite_angle));
+  spr_y = Math.round(sprites_y - 16 * Math.sin(sprite_angle));
+  for (let x_offset = 0; x_offset < 48; x_offset++) {
+    for (let y_offset = 0; y_offset < 42; y_offset++) {
+      if (mask.data[4*Math.floor(x_offset/2) + 4*sprite.width*Math.floor(y_offset/2)] > 128) {
+//        canvasData_2.data[4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+        canvasData_2.data[1+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 128;
+//        canvasData_2.data[2+4*(spr_x+x_offset) + 4*canvasWidth*(spr_y+y_offset)] = 0;
+      }
+    }
+  }
+
+  ctx.putImageData(canvasData_2, 0, 0);
+
+
+}
+
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return "$" + ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join(',')
+}
+
+function dump_output_data() {
+  console.log(toHexString(output_data));
+
+  const bytes_to_dump = 16384;
+  const bytes_per_row = 16;
+  let output_string="";
+  for (let row_no=0; row_no < (bytes_to_dump / bytes_per_row); row_no++) {
+    output_string += "  !byte " + toHexString(output_data.slice(row_no*bytes_per_row, (row_no+1)*bytes_per_row));
+//    for (let byte_no=0; byte_no < bytes_per_row; byte_no++) {
+//      let byte = output_data[byte_no + row_no * bytes_per_row];
+//      output_string += "$" + ('0' + (byte & 0xFF).toString(16)).slice(-2)+",";
+//    }
+//    let byte = output_data[ + row_no * bytes_per_row];
+//    output_string += "$" + ('0' + (byte & 0xFF).toString(16)).slice(-2)+",";
+    output_string += "\n";
+
+  }
+  console.log(output_string);
+
+}
+
+var time = 0;
+function animate(dt) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+//  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //updateCanvas(time * 2 * Math.PI / 4 / 256, "NEXT LEVEL", 150 + 80 * Math.sin(time * 2 * Math.PI / 12000), 20 + 40 * Math.cos(time * 2 * Math.PI / 6400));
+//  updateCanvas(time * 2 * Math.PI / 4 / 64 + 2 * Math.PI / 128, "NEXT LEVEL", 40, 60);
+//  updateCanvas(time * 2 * Math.PI / 4 / 64 + 2 * Math.PI / 128, "NEXT LEVEL", 40, 60);
+  let angle = 1*Math.floor(time/1) * 2 * Math.PI / 4 / 64 + 2 * Math.PI / 128;
+  let x = 40;
+  let y = 60;
+  updateCanvas(angle, " NEXT LEVEL", x, y);
+  duplicateCanvas(time, angle, x, y);
+  time += 1;
+  if (time == 128) {
+    time = 0;
+    dump_output_data();
+  }
+
+  window.requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body></html>

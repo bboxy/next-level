@@ -1,0 +1,86 @@
+
+  nmos6502 opcode table
+
+This table includes all of the unintended ("illegal") opcodes. These are
+marked using '+' or '!' signs:
+'+' means the instruction is supported by ACME,
+'!' means ACME will use a different (but functionally equivalent) opcode.
+
+
+00  brk             01  ora (zp, x)     02+ jam             03+ slo (zp, x)
+04+ nop zp          05  ora zp          06  asl zp          07+ slo zp
+08  php             09  ora #imm8       0a  asl             0b+ anc #imm8
+0c+ nop abs16       0d  ora abs16       0e  asl abs16       0f+ slo abs16
+10  bpl rel8        11  ora (zp), y     12! jam             13+ slo (zp), y
+14+ nop zp, x       15  ora zp, x       16  asl zp, x       17+ slo zp, x
+18  clc             19  ora abs16, y    1a! nop             1b+ slo abs16, y
+1c+ nop abs16, x    1d  ora abs16, x    1e  asl abs16, x    1f+ slo abs16, x
+
+20  jsr abs16       21  and (zp, x)     22! jam             23+ rla (zp, x)
+24  bit zp          25  and zp          26  rol zp          27+ rla zp
+28  plp             29  and #imm8       2a  rol             2b! anc #imm8
+2c  bit abs16       2d  and abs16       2e  rol abs16       2f+ rla abs16
+30  bmi rel8        31  and (zp), y     32! jam             33+ rla (zp), y
+34! nop zp, x       35  and zp, x       36  rol zp, x       37+ rla zp, x
+38  sec             39  and abs16, y    3a! nop             3b+ rla abs16, y
+3c! nop abs16, x    3d  and abs16, x    3e  rol abs16, x    3f+ rla abs16, x
+
+40  rti             41  eor (zp, x)     42! jam             43+ sre (zp, x)
+44! nop zp          45  eor zp          46  lsr zp          47+ sre zp
+48  pha             49  eor #imm8       4a  lsr             4b+ alr #imm8
+4c  jmp abs16       4d  eor abs16       4e  lsr abs16       4f+ sre abs16
+50  bvc rel8        51  eor (zp), y     52! jam             53+ sre (zp), y
+54! nop zp, x       55  eor zp, x       56  lsr zp, x       57+ sre zp, x
+58  cli             59  eor abs16, y    5a! nop             5b+ sre abs16, y
+5c! nop abs16, x    5d  eor abs16, x    5e  lsr abs16, x    5f+ sre abs16, x
+
+60  rts             61  adc (zp, x)     62! jam             63+ rra (zp, x)
+64! nop zp          65  adc zp          66  ror zp          67+ rra zp
+68  pla             69  adc #imm8       6a  ror             6b+ arr #imm8
+6c  jmp (abs16)     6d  adc abs16       6e  ror abs16       6f+ rra abs16
+70  bvs rel8        71  adc (zp), y     72! jam             73+ rra (zp), y
+74! nop zp, x       75  adc zp, x       76  ror zp, x       77+ rra zp, x
+78  sei             79  adc abs16, y    7a! nop             7b+ rra abs16, y
+7c! nop abs16, x    7d  adc abs16, x    7e  ror abs16, x    7f+ rra abs16, x
+
+80+ nop #imm8       81  sta (zp, x)     82! nop #imm8       83+ sax (zp, x)
+84  sty zp          85  sta zp          86  stx zp          87+ sax zp
+88  dey             89! nop #imm8       8a  txa             8b+ ane #imm8
+8c  sty abs16       8d  sta abs16       8e  stx abs16       8f+ sax abs16
+90  bcc rel8        91  sta (zp), y     92! jam             93+ sha (zp), y
+94  sty zp, x       95  sta zp, x       96  stx zp, y       97+ sax zp, y
+98  tya             99  sta abs16, y    9a  txs             9b+ tas abs16, y
+9c+ shy abs16, x    9d  sta abs16, x    9e+ shx abs16, y    9f+ sha abs16, y
+
+a0  ldy #imm8       a1  lda (zp, x)     a2  ldx #imm8       a3+ lax (zp, x)
+a4  ldy zp          a5  lda zp          a6  ldx zp          a7+ lax zp
+a8  tay             a9  lda #imm8       aa  tax             ab+ lxa #imm8
+ac  ldy abs16       ad  lda abs16       ae  ldx abs16       af+ lax abs16
+b0  bcs rel8        b1  lda (zp), y     b2! jam             b3+ lax (zp), y
+b4  ldy zp, x       b5  lda zp, x       b6  ldx zp, y       b7+ lax zp, y
+b8  clv             b9  lda abs16, y    ba  tsx             bb+ las abs16, y
+bc  ldy abs16, x    bd  lda abs16, x    be  ldx abs16, y    bf+ lax abs16, y
+
+c0  cpy #imm8       c1  cmp (zp, x)     c2! nop #imm8       c3+ dcp (zp, x)
+c4  cpy zp          c5  cmp zp          c6  dec zp          c7+ dcp zp
+c8  iny             c9  cmp #imm8       ca  dex             cb+ sbx #imm8
+cc  cpy abs16       cd  cmp abs16       ce  dec abs16       cf+ dcp abs16
+d0  bne rel8        d1  cmp (zp), y     d2! jam             d3+ dcp (zp), y
+d4! nop zp, x       d5  cmp zp, x       d6  dec zp, x       d7+ dcp zp, x
+d8  cld             d9  cmp abs16, y    da! nop             db+ dcp abs16, y
+dc! nop abs16, x    dd  cmp abs16, x    de  dec abs16, x    df+ dcp abs16, x
+
+e0  cpx #imm8       e1  sbc (zp, x)     e2! nop #imm8       e3+ isc (zp, x)
+e4  cpx zp          e5  sbc zp          e6  inc zp          e7+ isc zp
+e8  inx             e9  sbc #imm8       ea  nop             eb! sbc #imm8
+ec  cpx abs16       ed  sbc abs16       ee  inc abs16       ef+ isc abs16
+f0  beq rel8        f1  sbc (zp), y     f2! jam             f3+ isc (zp), y
+f4! nop zp, x       f5  sbc zp, x       f6  inc zp, x       f7+ isc zp, x
+f8  sed             f9  sbc abs16, y    fa! nop             fb+ isc abs16, y
+fc! nop abs16, x    fd  sbc abs16, x    fe  inc abs16, x    ff+ isc abs16, x
+
+
+#imm8:  8-bit immediate value
+zp:     8-bit zeropage address
+abs16:  16-bit absolute address
+rel8:   8-bit relative address offset

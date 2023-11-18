@@ -1,0 +1,224 @@
+
+
+                                 ACME
+
+         ...the ACME Crossassembler for Multiple Environments
+
+                          --- cpu types ---
+
+
+ACME supports the following cpu types (shown here as a sort of family
+tree):
+
+ 6502                   standard
+ |
+ |\_nmos6502 (=6510)    + undocumented opcodes
+ |
+ |\_c64dtv2             + BRA/SAC/SIR and some (not all!) undocumented
+ |
+  \_65c02               + BRA/PHX/PHY/PLX/PLY/STZ/TRB/TSB/...
+    |
+    |\_65816            16 bit regs, 24 bit address space, ...
+    |
+     \_r65c02           + bit manipulation instructions
+       |
+       |\_w65c02        + STP/WAI
+       |
+        \_65ce02        + Z reg, long branches, ...
+          |
+           \_4502       + MAP/EOM
+             |
+              \_m65     + 32-bit pointers, 32-bit 'Q' register
+
+
+
+	!cpu 6502
+
+This is the official instruction set of the original NMOS 6502 CPU
+designed by MOS (later CSG).
+There are 151 documented opcodes.
+ACME does not use "A" to indicate "accumulator addressing"; just write
+the mnemonic without any argument: "LSR" will work, "LSR A" won't.
+
+
+
+	!cpu nmos6502
+
+This instruction set includes the undocumented ("illegal") opcodes of
+the NMOS 6502.
+See "docs/Illegals.txt" for more info.
+
+
+
+	!cpu 6510
+
+This is an alias for "nmos6502", because the 6510 cpu (as used in the
+C64 computer) is a variant of this type.
+
+
+
+	!cpu c64dtv2
+
+This is the cpu in version 2 of the C64DTV. It uses a superset of the
+6502 instruction set. Features:
+- new instructions:
+	BRA near_target		branch always
+	SAC #$12		set accumulator mapping
+	SIR #$12		set index register mapping
+- support for some (but not all!) of the undocumented opcodes.
+
+
+
+	!cpu 65c02
+
+This is the CMOS re-design of the 6502. It seems to have also been
+available from Rockwell, GTE/CMD and others. Features:
+- new instructions:
+	BRA near_target		branch always
+	PHX/PHY/PLX/PLY		push/pull X/Y register
+	STZ $12			store zero in zp
+	STZ $12, x		store zero in zp, x-indexed
+	STZ $1234		store zero absolute
+	STZ $1234, x		store zero absolute, x-indexed
+	TRB $12			test and reset bits in zp
+	TRB $1234		test and reset bits absolute
+	TSB $12			test and set bits in zp
+	TSB $1234		test and set bits absolute
+- new addressing modes for existing instructions:
+	LDA/STA/ADC/SBC ($12)	zp indirect
+	AND/ORA/EOR/CMP ($12)	zp indirect
+	BIT #$12		immediate
+	BIT $12, x		zp, x-indexed
+	BIT $1234, x		absolute, x-indexed
+	INC			increment accumulator
+	DEC			decrement accumulator
+	JMP ($1234, x)		x-indexed indirect
+- bugfix for flags in decimal mode
+- bugfix for JMP($xxff) instruction
+- undocumented opcodes are NOPs (although of different lengths)
+There are 178 documented opcodes.
+
+
+
+	!cpu 65816
+
+This is a superset of 65c02, originally designed by WDC (it seems to
+have been available from GTE/CMD as well). Features:
+- register sizes can be changed to 16-bit
+- 24-bit address space
+- several new instructions (including block transfers)
+- several new addressing modes for existing instructions
+There are 256 documented opcodes, but one of them ("WDM") is reserved
+for future expansion.
+See "docs/65816.txt" for more info.
+
+
+
+	!cpu r65c02
+
+This is a superset of 65c02, probably originally by Rockwell. It adds
+bit manipulation instructions:
+	BBR4 $12, near_target	branch on bit reset in zp
+	BBS5 $12, near_target	branch on bit set in zp
+	RMB6 $12		reset memory bit in zp
+	SMB7 $12		set memory bit in zp
+The digit in the mnemonic is the bit number, therefore it must be in
+the 0..7 range.
+Chips with this instruction set seem to have been available from
+Rockwell, GTE/CMD and others.
+There are 210 documented opcodes.
+
+
+
+	!cpu w65c02
+
+This is a superset of r65c02, originating at WDC. It adds two new
+instructions:
+	STP			stop (wait for reset)
+	WAI			wait for interrupt
+There are 212 documented opcodes.
+
+
+
+	!cpu 65ce02
+
+This is a superset of r65c02, originating at CSG. Features:
+- Z register
+- 16-bit stack pointer
+- 16-bit branches
+- new instructions (including a few 16-bit operations)
+- new addressing modes for existing instructions
+There is a known bug: SBC does not work correctly in decimal mode.
+There are 256 documented opcodes, but one of them ("AUG") is reserved
+for future expansion.
+ACME uses different mnemonics for old and new (long) branch
+instructions:
+	BEQ near_target		old, 8-bit offset
+	LBEQ far_target		new, 16-bit offset
+The original datasheet called BRA ("branch always") BRU ("branch
+unconditional") instead. ACME accepts both mnemonics.
+
+
+
+	!cpu 4502
+
+This is basically the same as 65ce02, but
+- MAP replaces AUG
+- EOM is synonymous to NOP
+This cpu core can be found in the CSG4510 chip in the C65.
+There are 256 documented opcodes.
+
+
+
+	!cpu m65
+
+This is a superset of 4502 specified by the MEGA65 project. It uses
+NEG:NEG and NOP as prefix bytes to extend the instruction set.
+Features:
+- "quad mode" (32-bit data operations on virtual register 'Q')
+- "long mode" (32-bit pointer addressing for existing mnemonics)
+- "quad" and "long" modes can be combined
+quad mode introduces several new mnemonics:
+	LDQ/STQ/CPQ		like LDA/STA/CMP
+	ADCQ/SBCQ		like ADC/SBC
+	ANDQ/EORQ/ORQ		like AND/EOR/ORA
+	ASLQ/LSRQ/ROLQ/RORQ	like ASL/LSR/ROL/ROR
+	INQ/DEQ			like INC/DEC
+	BITQ			like BIT
+	ASRQ			like ASR
+  The new mnemonics support most of the addressing modes of the
+  original mnemonics with these exceptions:
+	- there is no immediate addressing
+	- indirect-Z-indexed addressing becomes indirect addressing
+	- all other indexed addressing modes can only really be used
+	with read-modify-write instructions or LDQ, because otherwise
+	a part of the 'Q' value would be used as the index.
+  CAUTION: The STQ instruction clobbers the N and Z flags!
+  There is no "real" Q register, instead A/X/Y/Z are combined to form
+  the Q register (A holds lsb, Z holds msb), except for read-modify-
+  write instructions, where the 32-bit operation is performed without
+  using A/X/Y/Z.
+  To load a 32-bit immediate constant into the Q register, use the
+  +movq macro from the <m65/std.a> library file.
+long mode brings a single new addressing mode for eight mnemonics:
+	LDA [$12], z		contents of $12/$13/$14/$15
+	STA [$12], z		plus z form the address
+	CMP [$12], z
+	ADC [$12], z
+	SBC [$12], z
+	AND [$12], z
+	EOR [$12], z
+	ORA [$12], z
+quad and long modes combined result in another addressing mode for
+  eight of the new mnemonics:
+	LDQ [$12]		contents of $12/$13/$14/$15
+	STQ [$12]		form the address
+	CPQ [$12]
+	ADCQ [$12]
+	SBCQ [$12]
+	ANDQ [$12]
+	EORQ [$12]
+	ORQ [$12]
+The NOP mnemonic is disabled for this instruction set because its
+opcode is re-used internally as a prefix byte.
+CAUTION: The !align pseudo opcode still inserts NOPs.

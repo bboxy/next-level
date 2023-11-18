@@ -1,0 +1,164 @@
+
+  65816 opcode table
+
+There are no more undocumented opcodes.
+All differences to the 65c02 are marked using a '+' sign, except
+for the #imm8 -> #imm change.
+
+
+00  brk             01  ora (dp, x)     02+ cop imm8        03+ ora offs8, s
+04  tsb dp          05  ora dp          06  asl dp          07+ ora [dp]
+08  php             09  ora #imm        0a  asl             0b+ phd
+0c  tsb abs16       0d  ora abs16       0e  asl abs16       0f+ ora abs24
+10  bpl rel8        11  ora (dp), y     12  ora (dp)        13+ ora (offs8, s), y
+14  trb dp          15  ora dp, x       16  asl dp, x       17+ ora [dp], y
+18  clc             19  ora abs16, y    1a  inc             1b+ tcs
+1c  trb abs16       1d  ora abs16, x    1e  asl abs16, x    1f+ ora abs24, x
+
+20  jsr abs16       21  and (dp, x)     22+ jsr abs24       23+ and offs8, s
+24  bit dp          25  and dp          26  rol dp          27+ and [dp]
+28  plp             29  and #imm        2a  rol             2b+ pld
+2c  bit abs16       2d  and abs16       2e  rol abs16       2f+ and abs24
+30  bmi rel8        31  and (dp), y     32  and (dp)        33+ and (offs8, s), y
+34  bit dp, x       35  and dp, x       36  rol dp, x       37+ and [dp], y
+38  sec             39  and abs16, y    3a  dec             3b+ tsc
+3c  bit abs16, x    3d  and abs16, x    3e  rol abs16, x    3f+ and abs24, x
+
+40  rti             41  eor (dp, x)     42+ wdm             43+ eor offs8, s
+44+ mvp src, dst    45  eor dp          46  lsr dp          47+ eor [dp]
+48  pha             49  eor #imm        4a  lsr             4b+ phk
+4c  jmp abs16       4d  eor abs16       4e  lsr abs16       4f+ eor abs24
+50  bvc rel8        51  eor (dp), y     52  eor (dp)        53+ eor (offs8, s), y
+54+ mvn src, dst    55  eor dp, x       56  lsr dp, x       57+ eor [dp], y
+58  cli             59  eor abs16, y    5a  phy             5b+ tcd
+5c+ jmp abs24       5d  eor abs16, x    5e  lsr abs16, x    5f+ eor abs24, x
+
+60  rts             61  adc (dp, x)     62+ per rel16       63+ adc offs8, s
+64  stz dp          65  adc dp          66  ror dp          67+ adc [dp]
+68  pla             69  adc #imm        6a  ror             6b+ rtl
+6c  jmp (abs16)     6d  adc abs16       6e  ror abs16       6f+ adc abs24
+70  bvs rel8        71  adc (dp), y     72  adc (dp)        73+ adc (offs8, s), y
+74  stz dp, x       75  adc dp, x       76  ror dp, x       77+ adc [dp], y
+78  sei             79  adc abs16, y    7a  ply             7b+ tdc
+7c  jmp (abs16, x)  7d  adc abs16, x    7e  ror abs16, x    7f+ adc abs24, x
+
+80  bra rel8        81  sta (dp, x)     82+ brl rel16       83+ sta offs8, s
+84  sty dp          85  sta dp          86  stx dp          87+ sta [dp]
+88  dey             89  bit #imm        8a  txa             8b+ phb
+8c  sty abs16       8d  sta abs16       8e  stx abs16       8f+ sta abs24
+90  bcc rel8        91  sta (dp), y     92  sta (dp)        93+ sta (offs8, s), y
+94  sty dp, x       95  sta dp, x       96  stx dp, y       97+ sta [dp], y
+98  tya             99  sta abs16, y    9a  txs             9b+ txy
+9c  stz abs16       9d  sta abs16, x    9e  stz abs16, x    9f+ sta abs24, x
+
+a0  ldy #imm        a1  lda (dp, x)     a2  ldx #imm        a3+ lda offs8, s
+a4  ldy dp          a5  lda dp          a6  ldx dp          a7+ lda [dp]
+a8  tay             a9  lda #imm        aa  tax             ab+ plb
+ac  ldy abs16       ad  lda abs16       ae  ldx abs16       af+ lda abs24
+b0  bcs rel8        b1  lda (dp), y     b2  lda (dp)        b3+ lda (offs8, s), y
+b4  ldy dp, x       b5  lda dp, x       b6  ldx dp, y       b7+ lda [dp], y
+b8  clv             b9  lda abs16, y    ba  tsx             bb+ tyx
+bc  ldy abs16, x    bd  lda abs16, x    be  ldx abs16, y    bf+ lda abs24, x
+
+c0  cpy #imm        c1  cmp (dp, x)     c2+ rep #imm8       c3+ cmp offs8, s
+c4  cpy dp          c5  cmp dp          c6  dec dp          c7+ cmp [dp]
+c8  iny             c9  cmp #imm        ca  dex             cb+ wai
+cc  cpy abs16       cd  cmp abs16       ce  dec abs16       cf+ cmp abs24
+d0  bne rel8        d1  cmp (dp), y     d2  cmp (dp)        d3+ cmp (offs8, s), y
+d4+ pei (dp)        d5  cmp dp, x       d6  dec dp, x       d7+ cmp [dp], y
+d8  cld             d9  cmp abs16, y    da  phx             db+ stp
+dc+ jmp [abs16]     dd  cmp abs16, x    de  dec abs16, x    df+ cmp abs24, x
+
+e0  cpx #imm        e1  sbc (dp, x)     e2+ sep #imm8       e3+ sbc offs8, s
+e4  cpx dp          e5  sbc dp          e6  inc dp          e7+ sbc [dp]
+e8  inx             e9  sbc #imm        ea  nop             eb+ xba
+ec  cpx abs16       ed  sbc abs16       ee  inc abs16       ef+ sbc abs24
+f0  beq rel8        f1  sbc (dp), y     f2  sbc (dp)        f3+ sbc (offs8, s), y
+f4+ pea abs16       f5  sbc dp, x       f6  inc dp, x       f7+ sbc [dp], y
+f8  sed             f9  sbc abs16, y    fa  plx             fb+ xce
+fc+ jsr (abs16, x)  fd  sbc abs16, x    fe  inc abs16, x    ff+ sbc abs24, x
+
+
+#imm:     immediate value (8 or 16 bits, depends on processor status)
+#imm8:    8-bit immediate value
+dp:       8-bit direct page address
+offs8:    8-bit offset (for stack-relative addressing)
+abs16:    16-bit absolute address
+abs24:    24-bit absolute address
+rel8:     8-bit relative address offset
+rel16:    16-bit relative address offset
+src, dst: two 8-bit bank values
+	(CAUTION: assembler expects "mnemonic src, dst" syntax,
+	but machine language order is actually "opcode dst src")
+
+
+The instruction set of the 65816 is a much extended superset of that
+of the 65c02. Among the improvements are:
+- the register widths can be switched to 16 bits
+- addresses can now be 24 bits wide
+- zero page is now called direct page, with an arbitrary base address
+- lots of new addressing modes
+- block transfer instructions
+
+New mnemonics
+-------------
+	02  cop imm8		coprocessor operation
+	6b  rtl			return long (fetches 24-bit address from stack)
+	82  brl rel16		branch long (16-bit offset)
+
+	0b  phd			push direct page register
+	4b  phk			push program bank register
+	8b  phb			push data bank register
+	62  per rel16		push effective relative address
+	d4  pei (dp)		push effective indirect address
+	f4  pea abs16		push effective absolute address
+
+	2b  pld			pull direct page register
+	ab  plb			pull data bank register
+
+	1b  tcs			transfer C to stack pointer
+	3b  tsc			transfer stack pointer to C
+	5b  tcd			transfer C to direct page register
+	7b  tdc			transfer direct page register to C
+	('C' means the whole 16-bit accumulator, even in 8-bit mode)
+	9b  txy			transfer X to Y
+	bb  tyx			transfer Y to X
+
+	eb  xba			exchange high and low bytes of accumulator
+	fb  xce			exchange Carry and Emulation bits
+
+	c2  rep #imm8		clear bits in status register
+	e2  sep #imm8		set bits in status register
+
+	cb  wai			wait for interrupt
+	db  stp			wait for reset
+
+	42  wdm			(reserved for future expansion)
+
+	block transfers:
+	44  mvp src, dst	move previous (decrementing addresses)
+	54  mvn src, dst	move next (incrementing addresses)
+	the arguments are bank numbers. block size minus one must be in 16-bit
+	accumulator. X holds source address, Y holds target address.
+	after these instructions, data bank register is set to "dst".
+	if blocks overlap:
+	when moving a block to a higher address, use mvp and put the highest
+	addresses in X/Y.
+	when moving a block to a lower address, use mvn and put the lowest
+	adresses in X/Y.
+
+New addressing modes for existing mnemonics
+-------------------------------------------
+	22  jsr abs24
+	5c  jmp abs24
+	dc  jmp [abs16]
+	fc  jsr (abs16, x)
+
+	ora and eor adc sta lda cmp sbc
+	-------------------------------
+	03  23  43  63  83  a3  c3  e3  offs8, s
+	07  27  47  67  87  a7  c7  e7  [dp]
+	0f  2f  4f  6f  8f  af  cf  ef  abs24
+	13  33  53  73  93  b3  d3  f3  (offs8, s), y
+	17  37  57  77  97  b7  d7  f7  [dp], y
+	1f  3f  5f  7f  9f  bf  df  ff  abs24, x

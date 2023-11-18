@@ -1,0 +1,125 @@
+.import source "framework/pseudocommands.asm"
+.import source "framework/macros.asm"
+
+.pseudopc <%unpackerAddress%>{
+.var chunklength = <%chunklength%>
+.var dataDestination = <%datadestination%>
+copySpeedCode:
+	ldx #<%numberOfCodeLoops%>
+        ldy #$00
+
+!:
+lda repeatData+ $100*0,y
+!a:
+sta dataDestination+ $100*0,y
+lda repeatData+ $100*1,y
+!b:
+sta dataDestination+ $100*1,y
+lda repeatData+ $100*2,y
+!c:
+sta dataDestination+ $100*2,y
+iny
+bne !-
+
+lda !a- + 1
+clc
+adc #<chunklength
+sta !a- + 1
+sta !b- + 1
+sta !c- + 1
+
+lda !a- + 2
+adc #>chunklength
+sta !a- + 2
+adc #1
+sta !b- + 2
+adc #1
+sta !c- + 2
+
+	dex
+	bne !-
+	lda #$4c
+	sta dataDestination + chunklength*<%numberOfCodeLoops%> + 0
+	lda #<create_back
+	sta dataDestination + chunklength*<%numberOfCodeLoops%> + 1
+	lda #>create_back
+	sta dataDestination + chunklength*<%numberOfCodeLoops%> + 2
+
+propagateDiffs:
+
+
+
+lookup1:
+	ldx changeLookupAddressesLB
+lookup2:
+	lda changeLookupAddressesHB
+	sta addValue +2
+
+dirty1:
+	lda dirtyAddressesLB
+	sta fetch +1
+	clc
+	adc #<chunklength
+	sta setValue +1
+dirty2:
+	lda dirtyAddressesHB
+	sta fetch +2
+	adc #>chunklength
+	sta setValue +2
+
+
+	ldy #<(<%numberOfCodeLoops%> -1)
+
+loop:
+fetch:
+	lda $2000
+addValue:
+	adc $2000,x
+setValue:
+	sta $2000
+	dey
+	beq !c+
+!:
+	//stx fetch + 1
+	//lda setValue + 2
+	//sta fetch + 2
+
+	clc
+	lda setValue + 1
+	sta fetch + 1
+	adc #<chunklength
+	sta setValue + 1
+	lda setValue + 2
+	sta fetch + 2
+	adc #>chunklength
+	sta setValue + 2
+	inx
+	bne loop
+	inc addValue + 2
+	jmp loop
+
+
+!c:
+dec outerCounter
+bne !c+
+dec outerCounter +1
+bmi !+
+!c:
+:incLabel(lookup1)
+:incLabel(lookup2)
+:incLabel(dirty1)
+:incLabel(dirty2)
+jmp lookup1
+!:
+rts
+
+
+jmp lookup1
+countDown:
+.byte  <(<%numberOfCodeLoops%> -1), >(<%numberOfCodeLoops%> -1)
+outerCounter:
+.byte <<%numberOfDiffs%>, ><%numberOfDiffs%>
+
+
+<%data%>
+}
